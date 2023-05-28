@@ -13,7 +13,7 @@ export class Searchbar extends Component{
         e.preventDefault();
         if (this.state.search.trim() === '') return
         this.props.onSubmit(this.state.search);
-        this.setState({ search: "" });
+        // this.setState({ search: "" });
     }
     render() {
         

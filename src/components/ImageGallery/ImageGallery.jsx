@@ -20,7 +20,7 @@ export class ImageGallery extends Component {
     this.fetchPictures();
   }
   
-componentDidUpdate(prevProps, prevState) {
+componentDidUpdate(prevProps, prevState, data) {
   if (prevProps.search !== this.props.search) {
     this.setState(
       {
@@ -56,7 +56,7 @@ componentDidUpdate(prevProps, prevState) {
         .then((data) => {
           this.setState((prevState) => ({
               pictures: [...prevState.pictures, ...data.hits],
-              totalImages: data.total,
+              totalImages: data.totalHits,
             status: 'resolved'
           }), () => {
             if (page > 1) {
@@ -87,18 +87,21 @@ componentDidUpdate(prevProps, prevState) {
   };
 
   handleLoadMore = () => {
-    this.setState(
-      (prevState) => ({
-        page: prevState.page + 1,
-        status: 'pending',
-        loading: true 
-      }),
+    const { pictures, totalImages } = this.state;
 
-    );
+    if (pictures.length < totalImages) {
+      this.setState(
+        (prevState) => ({
+          page: prevState.page + 1,
+          status: 'pending',
+          loading: true
+        }),
+      )
+    }
   };
 
   render() {
-    const { pictures, error, status, selectedPicture, loading } = this.state;
+      const { pictures, error, status, selectedPicture, loading, totalImages } = this.state;
 
     if (status === 'idle') {
       return (
@@ -115,7 +118,7 @@ componentDidUpdate(prevProps, prevState) {
     }
     if (status === 'resolved') {
       return (
-          <div>
+          <>
             {loading && <Loader />}
           <ul className={css.imageGallery}>
             {pictures.map((picture) => (
@@ -134,9 +137,10 @@ componentDidUpdate(prevProps, prevState) {
               onClose={this.handleCloseModal}
             />
           )}
-          
-          <ButtonLoadMore onLoadMore={this.handleLoadMore} />
-        </div>
+          {pictures.length <totalImages && (
+            <ButtonLoadMore onLoadMore={this.handleLoadMore} />
+          )}
+        </>
       );
     }
   }
