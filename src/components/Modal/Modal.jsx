@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import css from './Modal.module.css';
+import PropTypes from "prop-types";
 
 export class Modal extends Component {
   state = {
@@ -23,7 +24,7 @@ export class Modal extends Component {
   };
 
   onCloseModal = (event) => {
-    if (event.code === 'Escape') {
+    if (event.code === 'Escape'|| event.target === event.currentTarget) {
       this.props.onClose();
     }
   };
@@ -32,7 +33,8 @@ export class Modal extends Component {
     const { picture, isOpen } = this.props;
 
     return (
-      <div className={`${css.Overlay} ${isOpen ? "open" : ""}`}>
+      <div className={`${css.Overlay} ${isOpen ? "open" : ""}`}
+      onClick={this.onCloseModal}>
         <div className={css.Modal}>
           <img src={picture.largeImageURL} alt={picture.tags} />
         </div>
@@ -40,3 +42,10 @@ export class Modal extends Component {
     );
   }
 }
+
+  Modal.propTypes = {
+    picture: PropTypes.shape({
+      largeImageURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+    }),
+  };

@@ -3,6 +3,7 @@ import { ImageGalleryItem } from "components/ImageGalleryItem";
 import { Loader } from "components/Loader";
 import { Modal } from "components/Modal";
 import { ButtonLoadMore } from "components/Button";
+import PropTypes from "prop-types";
 import css from './ImageGallery.module.css';
 
 export class ImageGallery extends Component {
@@ -18,29 +19,33 @@ export class ImageGallery extends Component {
   componentDidMount() {
     this.fetchPictures();
   }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.search !== this.props.search) {
-      this.setState(
-        {
-          pictures: [],
-          page: 1,
-          status: 'pending' 
-        },
-        () => {
-          this.fetchPictures();
-        }
-      );
-    }
+  
+componentDidUpdate(prevProps, prevState) {
+  if (prevProps.search !== this.props.search) {
+    this.setState(
+      {
+        pictures: [],
+        page: 1,
+        status: 'pending' 
+      },
+      () => {
+        this.fetchPictures();
+      }
+    );
+  } else if (prevState.page !== this.state.page) {
+    this.fetchPictures();
   }
+}
+
 
   fetchPictures() {
     const { search } = this.props;
     const { page } = this.state;
 
-    if (search) {
+      if (search) {
       const url = `https://pixabay.com/api/?q=${search}&page=${page}&key=35198425-4c40430781db1dbcd425bce9c&image_type=photo&orientation=horizontal&per_page=12`;
-
+      
+    this.setState({ loading: true });
       fetch(url)
         .then((res) => {
           if (res.ok) {
@@ -50,7 +55,8 @@ export class ImageGallery extends Component {
         })
         .then((data) => {
           this.setState((prevState) => ({
-            pictures: [...prevState.pictures, ...data.hits],
+              pictures: [...prevState.pictures, ...data.hits],
+              totalImages: data.total,
             status: 'resolved'
           }), () => {
             if (page > 1) {
@@ -87,9 +93,7 @@ export class ImageGallery extends Component {
         status: 'pending',
         loading: true 
       }),
-      () => {
-        this.fetchPictures();
-      }
+
     );
   };
 
@@ -137,3 +141,7 @@ export class ImageGallery extends Component {
     }
   }
 }
+
+ImageGallery.propTypes = {
+    search: PropTypes.string.isRequired,
+  };
